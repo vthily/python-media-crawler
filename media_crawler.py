@@ -20,9 +20,13 @@ from mutagen import File
 import csv
 import traceback
 
+from slugify import slugify
+import subprocess
 
 CONNECTION_TIMEOUT = 20
 SUPPORTED_CONTENT_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/x-ms-wma', 'audio/ogg', 'audio/aac ']
+YOUTUBE_DL_TYPES =  ['audio/x-wav']
+DOCUMENT_CONTENT_TYPES = ['application/pdf', 'application/xls', 'application/x-xls', 'application/vnd.ms-excel']
 QUEUE_ID = 0
 QUEUE_PARENT = 1
 QUEUE_DEPTH = 2
@@ -209,6 +213,34 @@ class MediaCrawler(object):
         # Close temporary file
         fileobj.close()
 
+    def extract_wavs(self, url):
+        '''
+        Extract media data from file contained in response, using youtube-dl
+        @param url: url string
+        '''
+        output_name = url.rsplit('/', 1)[-1]
+        remain = url.rsplit('/', 1)[0]
+        output_path = 'output/[' + slugify(remain) + ']_' + output_name
+        args = ['youtube-dl', url , '-o', output_path]
+        retcode = subprocess.call(args)
+        if (retcode != 0):
+            print "There is an error happened during downloading wav files."
+        
+    def exract_document(self, url):
+        '''
+        Extract document from file contained in response
+        @param url: url string
+        '''
+        response = urllib2.urlopen(urllib2.quote(url, safe=":/"))
+        document_name = (urllib2.quote(url, safe=":/")).split('/')[-1]
+        remain = url.rsplit('/', 1)[0]
+
+        print("Downloading document file from " + url + " and writing to file " + document_name)
+        file = open('output/[' + slugify(remain) + ']_' + document_name, 'w')
+        file.write(response.read())
+        file.close()
+        print("Downloading file completed.")
+                
     def crawl(self, crawling):
         '''
         Main method that extracts links from url
@@ -250,6 +282,14 @@ class MediaCrawler(object):
             if any(x in content_type for x in SUPPORTED_CONTENT_TYPES):
                 # extract media data
                 self.exract_media(response, curl)
+            
+            elif any(x in content_type for x in YOUTUBE_DL_TYPES):
+                # extract media data
+                self.exract_wavs(curl)
+                
+            elif any(x in content_type for x in DOCUMENT_CONTENT_TYPES):
+                self.extract_document(curl)
+                
             else: # probably an HTML page
                 # convert response to unicode and extract links from html
                 html = response.read()
