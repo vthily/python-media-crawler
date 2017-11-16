@@ -226,7 +226,7 @@ class MediaCrawler(object):
         if (retcode != 0):
             print "There is an error happened during downloading wav files."
         
-    def exract_document(self, url):
+    def extract_document(self, url):
         '''
         Extract document from file contained in response
         @param url: url string
