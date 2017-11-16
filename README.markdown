@@ -21,6 +21,11 @@ Prereqs:
 ----------
 Included in repo so you don't have to manually download it. Just for informational purposes.
 - http://code.google.com/p/mutagen/ - Lib for getting metadata from media files
+Need to download youtube-dl (https://github.com/rg3/youtube-dl)
+- Command line to install (Unix/Ubuntu): 
+    sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+    sudo chmod a+rx /usr/local/bin/youtube-dl
+
 
 Future improvements
 ----------------------
